@@ -1,18 +1,44 @@
-package kick_user
+package uservote
 
-type uservotes struct {
-	time int
-	votes []string
+import {
+	"fmt"
+	"time"
+	"logger"
 }
 
-func userVotes yesGreateThanNo() bool {
+type uservote  struct {
+	starttime int
+	votes []bool
+}
+
+func constructUserVote() *uservote {
+	uv = new(uservote)
+	uv.starttime = time.Now()
+	uv.votes = make([5]string)
+
+	return uv
+}
+
+
+func (uv *uservote) yesGreateThanNo() bool {
 
 }
 
-func userVotes getYesVoteCount() int {
-
+func (uv *uservote) getYesVoteCount() int {
+	yesCount := 0
+	for i := 0; i < uv.votes.len(); i++ {
+		if uv[i] {
+			yesCount++
+		}
+	}
+	return yesCount
 } 
 
-func userVotes getNoVoteCount() int {
-	
+func (uv *uservote) getNoVoteCount() int {
+	noCount := 0
+	for i := 0; i < uv.votes.len(); i++ {
+		if !uv[i] {
+			noCount++
+		}
+	}
 }
