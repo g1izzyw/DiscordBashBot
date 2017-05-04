@@ -21,7 +21,10 @@ func constructUserVote() *uservote {
 
 
 func (uv *uservote) yesGreateThanNo() bool {
+	yesCount := uv.getYesVoteCount()
+	noCount := uv.getNoVoteCount()
 
+	return yesCount > noCount
 }
 
 func (uv *uservote) getYesVoteCount() int {
@@ -41,4 +44,5 @@ func (uv *uservote) getNoVoteCount() int {
 			noCount++
 		}
 	}
+	return noCount
 }
