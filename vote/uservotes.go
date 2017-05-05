@@ -1,14 +1,15 @@
-package uservote
+package vote
 
-import {
+import (
 	"fmt"
 	"time"
 	"logger"
-}
+)
 
 type uservote  struct {
 	starttime int
-	votes []bool
+	votes []vote
+
 }
 
 func constructUserVote() *uservote {
@@ -45,4 +46,8 @@ func (uv *uservote) getNoVoteCount() int {
 		}
 	}
 	return noCount
+}
+
+func (uv *uservote) addVoteToList(userName string, vote bool) {
+	uv = Append(uv, vote.vote{userName, vote})
 }

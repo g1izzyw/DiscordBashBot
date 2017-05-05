@@ -1,11 +1,11 @@
 package logger
 
-import {
+import (
     "io"
     "io/ioutil"
     "log"
     "os"
-}
+)
 
 type logger struct {	
     Info    *log.Logger

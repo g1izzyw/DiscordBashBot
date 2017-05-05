@@ -3,8 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"time"
-
+	. "DiscordBashBot/util"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -28,7 +27,7 @@ func main() {
 	}
 
 	// Register messageCreate as a callback for the messageCreate events.
-	dg.AddHandler(messageCreate)
+	dg.AddHandler(BotMentionedMessageCreate(NonBotMessageCreate(botResponse)))
 
 	// Open the websocket and begin listening.
 	err = dg.Open()
@@ -45,11 +44,9 @@ func main() {
 
 // This function will be called (due to AddHandler above) every time a new
 // message is created on any channel that the autenticated bot has access to.
-func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
+func botResponse(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Print message to stdout.
-	fmt.Printf("%20s %20s %20s > %s\n", m.ChannelID, time.Now().Format(time.Stamp), m.Author.Username, m.Content)
-	if m.Author.Username != "bash-bot"{
-		s.ChannelMessageSend(m.ChannelID, "I heard you, " + m.Author.Username)
-	}
+	//fmt.Printf("%20s %20s %20s > %s\n", m.ChannelID, time.Now().Format(time.Stamp), m.Author.Username, m.Content)
+	s.ChannelMessageSend(m.ChannelID, "I heard you, " + m.Author.Username)
 }
