@@ -41,6 +41,7 @@ func (voteToUpdate *kickplayervote) addVote(u *User, vote bool) {
 }
 
 func (voteToCheck *kickplayervote) votePassed() bool {
+	fmt.Printf("%d uservote length", len(voteToCheck.userVotes.votes))
 	return (len(voteToCheck.userVotes.votes) > 0)
 }
 
@@ -55,9 +56,10 @@ func HandleKickVote(s *Session, m *MessageCreate) {
 
 	for _, mentionedUser := range m.Mentions {
 		if mentionedUser.ID != botUser.ID {
-			var kv kickplayervote
+			var kv *kickplayervote
+			var ok bool
 
-			if kv, ok := kickPlayerVoteMap[mentionedUser.ID]; ok {
+			if kv, ok = kickPlayerVoteMap[mentionedUser.ID]; ok {
 				for _, info := range kv.userVotes.votes {
 					if m.Author.ID == info.user.ID {
 						// TODO: bot message to print -> can't vote twice
@@ -66,16 +68,15 @@ func HandleKickVote(s *Session, m *MessageCreate) {
 				}
 
 			} else {
-				fmt.Println("here1")
-				kv := ConstructKickPlayer(mentionedUser)
+				kv = ConstructKickPlayer(mentionedUser)
 				kv.startVote() //TODO implement
 				kickPlayerVoteMap[mentionedUser.ID] = kv
 			}
-			fmt.Println("here4")
+			fmt.Println("here2")
 			kv.addVote(m.Author, true)
 
 			if kv.votePassed() {
-
+				fmt.Println("here1")
 				var guildToBanFrom *Guild
 				guilds, _ := s.UserGuilds()
 				foundGuild := false
@@ -83,20 +84,32 @@ func HandleKickVote(s *Session, m *MessageCreate) {
 					guild, _ := s.Guild(userGuild.ID)
 					for _, member := range guild.Members {
 						if member.User.ID == kv.playerToKick.ID {
+							fmt.Println("here3")
 							foundGuild = true
 							guildToBanFrom = guild
 							break
 						}
 					}
 					if foundGuild {
+						fmt.Println("here4")
 						break
 					}
 				}
 				if guildToBanFrom == nil {
+					fmt.Println("here5")
 					//TODO: print failure message of some kind
 					return
 				}
-				s.GuildBanCreate(guildToBanFrom.ID, kv.playerToKick.ID, 1)
+				fmt.Println("here6")
+				err := s.GuildBanCreate(guildToBanFrom.ID, kv.playerToKick.ID, 1)
+				if err != nil {
+					fmt.Print("user: ")
+					fmt.Println(kv.playerToKick.Username)
+					fmt.Print("guild: ")
+					fmt.Println(guildToBanFrom.Name)
+					fmt.Print("Failed to ban: ")
+					fmt.Println(err)
+				}
 				time.Sleep(time.Second * 10)
 				s.GuildBanDelete(guildToBanFrom.ID, kv.playerToKick.ID)
 			}
