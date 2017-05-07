@@ -1,9 +1,11 @@
 package main
 
 import (
+	. "DiscordBashBot/util"
+	. "DiscordBashBot/vote"
 	"flag"
 	"fmt"
-	. "DiscordBashBot/util"
+
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -28,6 +30,7 @@ func main() {
 
 	// Register messageCreate as a callback for the messageCreate events.
 	dg.AddHandler(BotMentionedMessageCreate(NonBotMessageCreate(botResponse)))
+	dg.AddHandler(BotMentionedMessageCreate(NonBotMessageCreate(HandleKickVote)))
 
 	// Open the websocket and begin listening.
 	err = dg.Open()
@@ -46,7 +49,5 @@ func main() {
 // message is created on any channel that the autenticated bot has access to.
 func botResponse(s *discordgo.Session, m *discordgo.MessageCreate) {
 
-	// Print message to stdout.
-	//fmt.Printf("%20s %20s %20s > %s\n", m.ChannelID, time.Now().Format(time.Stamp), m.Author.Username, m.Content)
-	s.ChannelMessageSend(m.ChannelID, "I heard you, " + m.Author.Username)
+	s.ChannelMessageSend(m.ChannelID, "I heard you, "+m.Author.Username)
 }
