@@ -1,11 +1,13 @@
 package vote
 
 import (
-	"fmt"
-	"logger"
+	"time"
+
+	. "github.com/bwmarrin/discordgo"
 )
 
-type vote struct {
-	username string
-	vote bool
+type voteinfo struct {
+	user       *User
+	vote       bool
+	timePlaced time.Time
 }

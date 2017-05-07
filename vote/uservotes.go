@@ -1,53 +1,57 @@
 package vote
 
 import (
-	"fmt"
 	"time"
-	"logger"
+
+	. "github.com/bwmarrin/discordgo"
 )
 
-type uservote  struct {
-	starttime int
-	votes []vote
-
+type IUserVote interface {
+	votePassed() bool
+	startVote()
+	addVote(*User, bool)
 }
 
-func constructUserVote() *uservote {
-	uv = new(uservote)
+type uservote struct {
+	starttime time.Time
+	votes     []voteinfo
+}
+
+func ConstructUserVote() *uservote {
+	uv := new(uservote)
 	uv.starttime = time.Now()
-	uv.votes = make([5]string)
+	uv.votes = make([]voteinfo, 10)
 
 	return uv
 }
 
-
-func (uv *uservote) yesGreateThanNo() bool {
-	yesCount := uv.getYesVoteCount()
-	noCount := uv.getNoVoteCount()
+func (uv *uservote) YesGreaterThanNo() bool {
+	yesCount := uv.GetYesVoteCount()
+	noCount := uv.GetNoVoteCount()
 
 	return yesCount > noCount
 }
 
-func (uv *uservote) getYesVoteCount() int {
+func (uv *uservote) GetYesVoteCount() int {
 	yesCount := 0
-	for i := 0; i < uv.votes.len(); i++ {
-		if uv[i] {
+	for _, vote := range uv.votes {
+		if vote.vote {
 			yesCount++
 		}
 	}
 	return yesCount
-} 
+}
 
-func (uv *uservote) getNoVoteCount() int {
+func (uv *uservote) GetNoVoteCount() int {
 	noCount := 0
-	for i := 0; i < uv.votes.len(); i++ {
-		if !uv[i] {
+	for _, vote := range uv.votes {
+		if !vote.vote {
 			noCount++
 		}
 	}
 	return noCount
 }
 
-func (uv *uservote) addVoteToList(userName string, vote bool) {
-	uv = Append(uv, vote.vote{userName, vote})
+func (uv *uservote) AddVoteToList(u *User, vote bool) {
+	uv.votes = append(uv.votes, voteinfo{u, vote, time.Now()})
 }
