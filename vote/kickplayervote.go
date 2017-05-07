@@ -35,11 +35,11 @@ func (voteToStart *kickplayervote) startVote() {
 }
 
 func (voteToStart *kickplayervote) addVote(u *User, vote bool) {
-
+	kickplayervote.userVotes.AddVoteToList(u, vote)
 }
 
 func (voteToStart *kickplayervote) votePassed() bool {
-	return true
+	return (len(kickplayervote.userVotes.votes) > 3)
 }
 
 func HandleKickVote(s *Session, m *MessageCreate) {
@@ -69,7 +69,7 @@ func HandleKickVote(s *Session, m *MessageCreate) {
 				kickPlayerVoteMap[mentionedUser.ID] = kv
 			}
 
-			kv.addVote(m.Author, true) //TODO implement
+			kv.addVote(m.Author, true)
 
 			if kv.votePassed() {
 				//TODO actually kick the player
