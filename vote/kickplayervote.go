@@ -1,7 +1,9 @@
 package vote
 
 import (
+	"fmt"
 	"strings"
+	"time"
 
 	. "github.com/bwmarrin/discordgo"
 )
@@ -26,7 +28,7 @@ func ConstructKickPlayer(u *User) *kickplayervote {
 
 	kpv.userVotes = ConstructUserVote()
 	kpv.playerToKick = u
-
+	fmt.Println("here3")
 	return kpv
 }
 
@@ -34,12 +36,12 @@ func (voteToStart *kickplayervote) startVote() {
 
 }
 
-func (voteToStart *kickplayervote) addVote(u *User, vote bool) {
-	kickplayervote.userVotes.AddVoteToList(u, vote)
+func (voteToUpdate *kickplayervote) addVote(u *User, vote bool) {
+	voteToUpdate.userVotes.AddVoteToList(u, vote)
 }
 
-func (voteToStart *kickplayervote) votePassed() bool {
-	return (len(kickplayervote.userVotes.votes) > 3)
+func (voteToCheck *kickplayervote) votePassed() bool {
+	return (len(voteToCheck.userVotes.votes) > 0)
 }
 
 func HandleKickVote(s *Session, m *MessageCreate) {
@@ -64,15 +66,39 @@ func HandleKickVote(s *Session, m *MessageCreate) {
 				}
 
 			} else {
+				fmt.Println("here1")
 				kv := ConstructKickPlayer(mentionedUser)
 				kv.startVote() //TODO implement
 				kickPlayerVoteMap[mentionedUser.ID] = kv
 			}
-
+			fmt.Println("here4")
 			kv.addVote(m.Author, true)
 
 			if kv.votePassed() {
-				//TODO actually kick the player
+
+				var guildToBanFrom *Guild
+				guilds, _ := s.UserGuilds()
+				foundGuild := false
+				for _, userGuild := range guilds {
+					guild, _ := s.Guild(userGuild.ID)
+					for _, member := range guild.Members {
+						if member.User.ID == kv.playerToKick.ID {
+							foundGuild = true
+							guildToBanFrom = guild
+							break
+						}
+					}
+					if foundGuild {
+						break
+					}
+				}
+				if guildToBanFrom == nil {
+					//TODO: print failure message of some kind
+					return
+				}
+				s.GuildBanCreate(guildToBanFrom.ID, kv.playerToKick.ID, 1)
+				time.Sleep(time.Second * 10)
+				s.GuildBanDelete(guildToBanFrom.ID, kv.playerToKick.ID)
 			}
 
 			return

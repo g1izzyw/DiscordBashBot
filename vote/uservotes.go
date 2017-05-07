@@ -1,6 +1,7 @@
 package vote
 
 import (
+	"fmt"
 	"time"
 
 	. "github.com/bwmarrin/discordgo"
@@ -14,14 +15,17 @@ type IUserVote interface {
 
 type uservote struct {
 	starttime time.Time
-	votes     []voteinfo
+	votes     []*voteinfo
 }
 
 func ConstructUserVote() *uservote {
 	uv := new(uservote)
 	uv.starttime = time.Now()
-	uv.votes = make([]voteinfo, 10)
-
+	uv.votes = []*voteinfo{}
+	fmt.Println("here2")
+	if uv == nil {
+		fmt.Println("uv is nil")
+	}
 	return uv
 }
 
@@ -53,5 +57,12 @@ func (uv *uservote) GetNoVoteCount() int {
 }
 
 func (uv *uservote) AddVoteToList(u *User, vote bool) {
-	uv.votes = append(uv.votes, voteinfo{u, vote, time.Now()})
+	if uv == nil {
+		fmt.Println("test2341546")
+	}
+	newUserVote := new(voteinfo)
+	newUserVote.timePlaced = time.Now()
+	newUserVote.user = u
+	newUserVote.vote = vote
+	uv.votes = append(uv.votes, newUserVote)
 }
