@@ -77,30 +77,19 @@ func HandleKickVote(s *Session, m *MessageCreate) {
 
 			if kv.votePassed() {
 				fmt.Println("here1")
-				var guildToBanFrom *Guild
-				guilds, _ := s.UserGuilds()
-				foundGuild := false
-				for _, userGuild := range guilds {
-					guild, _ := s.Guild(userGuild.ID)
-					for _, member := range guild.Members {
-						if member.User.ID == kv.playerToKick.ID {
-							fmt.Println("here3")
-							foundGuild = true
-							guildToBanFrom = guild
-							break
-						}
-					}
-					if foundGuild {
-						fmt.Println("here4")
-						break
-					}
-				}
+
+				//var guildToBanFrom *Guild
+				channel, _ := s.Channel(m.ChannelID)
+ 				guildToBanFrom, _ := s.Guild(channel.GuildID)
+
 				if guildToBanFrom == nil {
 					fmt.Println("here5")
 					//TODO: print failure message of some kind
 					return
 				}
 				fmt.Println("here6")
+
+
 				err := s.GuildBanCreate(guildToBanFrom.ID, kv.playerToKick.ID, 1)
 				if err != nil {
 					fmt.Print("user: ")
@@ -110,7 +99,7 @@ func HandleKickVote(s *Session, m *MessageCreate) {
 					fmt.Print("Failed to ban: ")
 					fmt.Println(err)
 				}
-				time.Sleep(time.Second * 10)
+				time.Sleep(time.Second * 60)
 				s.GuildBanDelete(guildToBanFrom.ID, kv.playerToKick.ID)
 			}
 
