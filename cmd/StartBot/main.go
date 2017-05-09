@@ -5,8 +5,10 @@ import (
 	. "DiscordBashBot/vote"
 	"flag"
 	"fmt"
+	"io/ioutil"
 
 	"github.com/bwmarrin/discordgo"
+	"gopkg.in/yaml.v2"
 )
 
 // Variables used for command line parameters
@@ -14,15 +16,28 @@ var (
 	Token string
 )
 
+type Configuration struct {
+	Token string
+}
+
 func init() {
 	flag.StringVar(&Token, "t", "", "Bot Token")
 	flag.Parse()
 }
 
 func main() {
+	file, err := ioutil.ReadFile("./config.yml")
+	if err != nil {
+		fmt.Println("Error opening config file: ", err)
+	}
+	configuration := new(Configuration)
+	err = yaml.Unmarshal(file, configuration)
+	if err != nil {
+		fmt.Println("Error parsing config file:", err)
+	}
 
 	// Create a new Discord session using the provided bot token.
-	dg, err := discordgo.New("Bot " + Token)
+	dg, err := discordgo.New("Bot " + configuration.Token)
 	if err != nil {
 		fmt.Println("error creating Discord session,", err)
 		return
