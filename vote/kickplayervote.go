@@ -54,7 +54,7 @@ func (voteToUpdate *kickplayervote) addVote(u *User, vote bool) {
 
 func (voteToCheck *kickplayervote) votePassed() bool {
 	fmt.Printf("%d uservote length", len(voteToCheck.userVotes.votes))
-	return (len(voteToCheck.userVotes.votes) > 0)
+	return (len(voteToCheck.userVotes.votes) >= 3)
 }
 
 func HandleKickVote(s *Session, m *MessageCreate) {
