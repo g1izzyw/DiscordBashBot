@@ -8,7 +8,7 @@ import (
 
 type IUserVote interface {
 	votePassed() bool
-	startVote()
+	startVote(*Session)
 	addVote(*User, bool)
 }
 

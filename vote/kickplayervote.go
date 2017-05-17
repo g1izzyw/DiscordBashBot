@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	. "DiscordBashBot/util"
+
 	. "github.com/bwmarrin/discordgo"
 )
 
@@ -32,8 +34,18 @@ func ConstructKickPlayer(u *User) *kickplayervote {
 	return kpv
 }
 
-func (voteToStart *kickplayervote) startVote() {
+func (voteToStart *kickplayervote) startVote(s *Session) {
+	s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("You have 2 min to kick player %v", voteToStart.playerToKick.Username))
 
+	WarningOutputByBot(1.5*time.Minute, fmt.Sprintf("You have 30 second remaining for your vote to kick %v", voteToStart.playerToKick.Username), s)
+
+	go func() {
+		time.Sleep(2 * time.Minute)
+		if kv, ok = kickPlayerVoteMap[voteToStart.playerToKick.ID]; ok {
+			delete(kickPlayerVoteMap, voteToStart.playerToKick.ID)
+			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Vote has expired for kick player %v", voteToStart.playerToKick.Username))
+		}
+	}()
 }
 
 func (voteToUpdate *kickplayervote) addVote(u *User, vote bool) {
@@ -62,14 +74,14 @@ func HandleKickVote(s *Session, m *MessageCreate) {
 			if kv, ok = kickPlayerVoteMap[mentionedUser.ID]; ok {
 				for _, info := range kv.userVotes.votes {
 					if m.Author.ID == info.user.ID {
-						// TODO: bot message to print -> can't vote twice
+						s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("%v can't vote to kick again for player %v", m.Author.Mention(), kv.playerToKick.Username))
 						return
 					}
 				}
 
 			} else {
 				kv = ConstructKickPlayer(mentionedUser)
-				kv.startVote() //TODO implement
+				kv.startVote(s)
 				kickPlayerVoteMap[mentionedUser.ID] = kv
 			}
 			fmt.Println("here2")
@@ -80,15 +92,13 @@ func HandleKickVote(s *Session, m *MessageCreate) {
 
 				//var guildToBanFrom *Guild
 				channel, _ := s.Channel(m.ChannelID)
- 				guildToBanFrom, _ := s.Guild(channel.GuildID)
+				guildToBanFrom, _ := s.Guild(channel.GuildID)
 
 				if guildToBanFrom == nil {
-					fmt.Println("here5")
-					//TODO: print failure message of some kind
+					fmt.Println("Guild to ban from does not exist")
 					return
 				}
 				fmt.Println("here6")
-
 
 				err := s.GuildBanCreate(guildToBanFrom.ID, kv.playerToKick.ID, 1)
 				if err != nil {
@@ -99,13 +109,16 @@ func HandleKickVote(s *Session, m *MessageCreate) {
 					fmt.Print("Failed to ban: ")
 					fmt.Println(err)
 				}
+				delete(kickPlayerVoteMap, kv.playerToKick.ID) // remove vote from the map, when player is kicked
+
 				time.Sleep(time.Second * 60)
+
 				s.GuildBanDelete(guildToBanFrom.ID, kv.playerToKick.ID)
 			}
 
 			return
 		}
 	}
-
-	//TODO: can't kick bot ..|..
+	// can't kick the bot
+	s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("..|.. %v", m.Author.Mention()))
 }

@@ -1,6 +1,8 @@
 package util
 
 import (
+	"time"
+
 	. "github.com/bwmarrin/discordgo"
 )
 
@@ -34,4 +36,11 @@ func IsUserMentionedByUser(m *MessageCreate, u *User) bool {
 func IsUserMentionedByID(s *Session, m *MessageCreate, id string) bool {
 	u, _ := s.User(id)
 	return IsUserMentionedByUser(m, u)
+}
+
+func WarningOutputByBot(t time.Duration, message string, s *Session) {
+	go func() {
+		time.Sleep(t)
+		s.ChannelMessageSend(m.ChannelID, message)
+	}()
 }

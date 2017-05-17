@@ -7,8 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/bwmarrin/discordgo"
-	"gopkg.in/yaml.v2"
+	. "github.com/bwmarrin/discordgo"
 )
 
 // Variables used for command line parameters
@@ -62,7 +61,7 @@ func main() {
 
 // This function will be called (due to AddHandler above) every time a new
 // message is created on any channel that the autenticated bot has access to.
-func botResponse(s *discordgo.Session, m *discordgo.MessageCreate) {
+func botResponse(s *Session, m *MessageCreate) {
 
 	s.ChannelMessageSend(m.ChannelID, "I heard you, "+m.Author.Username)
 }
