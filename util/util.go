@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"time"
 
 	. "github.com/bwmarrin/discordgo"
@@ -24,6 +25,23 @@ func BotMentionedMessageCreate(handler func(s *Session, m *MessageCreate)) func(
 	}
 }
 
+func IsValidBotResponseChannel(handler func(s *Session, m *MessageCreate), channelIdList []string) func(s *Session, m *MessageCreate) {
+	return func(s *Session, m *MessageCreate) {
+
+		messageChannel, _ := s.Channel(m.ChannelID)
+
+		for _, channelId := range channelIdList {
+			channel, _ := s.Channel(channelId)
+			if messageChannel.Name == channel.Name {
+				handler(s, m)
+				return
+			}
+		}
+
+		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("%v this channel does not process command, try another channel", m.ChannelID))
+	}
+}
+
 func IsUserMentionedByUser(m *MessageCreate, u *User) bool {
 	for _, mentionedUser := range m.Mentions {
 		if mentionedUser.ID == u.ID {
@@ -38,9 +56,9 @@ func IsUserMentionedByID(s *Session, m *MessageCreate, id string) bool {
 	return IsUserMentionedByUser(m, u)
 }
 
-func WarningOutputByBot(t time.Duration, message string, s *Session) {
+func WarningOutputByBot(t time.Duration, message string, s *Session, channelId string) {
 	go func() {
 		time.Sleep(t)
-		s.ChannelMessageSend(m.ChannelID, message)
+		s.ChannelMessageSend(channelId, message)
 	}()
 }

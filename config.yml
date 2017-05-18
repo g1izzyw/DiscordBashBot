@@ -1,2 +1,4 @@
 ---
 token: 
+validChannelList: 
+  - general_chat

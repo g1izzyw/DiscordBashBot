@@ -23,27 +23,30 @@ func init() {
 type kickplayervote struct {
 	playerToKick *User
 	userVotes    *uservote
+	channelID    string
 }
 
-func ConstructKickPlayer(u *User) *kickplayervote {
+func ConstructKickPlayer(u *User, cId string) *kickplayervote {
 	kpv := new(kickplayervote)
 
 	kpv.userVotes = ConstructUserVote()
 	kpv.playerToKick = u
+	kpv.channelID = cId
+
 	fmt.Println("here3")
 	return kpv
 }
 
 func (voteToStart *kickplayervote) startVote(s *Session) {
-	s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("You have 2 min to kick player %v", voteToStart.playerToKick.Username))
+	s.ChannelMessageSend(voteToStart.channelID, fmt.Sprintf("You have 2 min to kick player %v", voteToStart.playerToKick.Username))
 
-	WarningOutputByBot(1.5*time.Minute, fmt.Sprintf("You have 30 second remaining for your vote to kick %v", voteToStart.playerToKick.Username), s)
+	WarningOutputByBot(time.Minute+(30*time.Second), fmt.Sprintf("You have 30 second remaining for your vote to kick %v", voteToStart.playerToKick.Username), s, voteToStart.channelID)
 
 	go func() {
 		time.Sleep(2 * time.Minute)
-		if kv, ok = kickPlayerVoteMap[voteToStart.playerToKick.ID]; ok {
+		if voteToStart, ok := kickPlayerVoteMap[voteToStart.playerToKick.ID]; ok {
 			delete(kickPlayerVoteMap, voteToStart.playerToKick.ID)
-			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Vote has expired for kick player %v", voteToStart.playerToKick.Username))
+			s.ChannelMessageSend(voteToStart.channelID, fmt.Sprintf("Vote has expired for kick player %v", voteToStart.playerToKick.Username))
 		}
 	}()
 }
@@ -74,13 +77,13 @@ func HandleKickVote(s *Session, m *MessageCreate) {
 			if kv, ok = kickPlayerVoteMap[mentionedUser.ID]; ok {
 				for _, info := range kv.userVotes.votes {
 					if m.Author.ID == info.user.ID {
-						s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("%v can't vote to kick again for player %v", m.Author.Mention(), kv.playerToKick.Username))
+						s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("<@%v> can't vote to kick again for player %v", m.Author.ID, kv.playerToKick.Username))
 						return
 					}
 				}
 
 			} else {
-				kv = ConstructKickPlayer(mentionedUser)
+				kv = ConstructKickPlayer(mentionedUser, m.ChannelID)
 				kv.startVote(s)
 				kickPlayerVoteMap[mentionedUser.ID] = kv
 			}
@@ -120,5 +123,5 @@ func HandleKickVote(s *Session, m *MessageCreate) {
 		}
 	}
 	// can't kick the bot
-	s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("..|.. %v", m.Author.Mention()))
+	s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("..|.. <@%v>", m.Author.ID))
 }

@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 
 	. "github.com/bwmarrin/discordgo"
+	. "gopkg.in/yaml.v2"
 )
 
 // Variables used for command line parameters
@@ -16,7 +17,8 @@ var (
 )
 
 type Configuration struct {
-	Token string
+	Token            string
+	ValidChannelList []string
 }
 
 func init() {
@@ -30,21 +32,21 @@ func main() {
 		fmt.Println("Error opening config file: ", err)
 	}
 	configuration := new(Configuration)
-	err = yaml.Unmarshal(file, configuration)
+	err = Unmarshal(file, configuration)
 	if err != nil {
 		fmt.Println("Error parsing config file:", err)
 	}
 
 	// Create a new Discord session using the provided bot token.
-	dg, err := discordgo.New("Bot " + configuration.Token)
+	dg, err := New("Bot " + configuration.Token)
 	if err != nil {
 		fmt.Println("error creating Discord session,", err)
 		return
 	}
 
 	// Register messageCreate as a callback for the messageCreate events.
-	dg.AddHandler(BotMentionedMessageCreate(NonBotMessageCreate(botResponse)))
-	dg.AddHandler(BotMentionedMessageCreate(NonBotMessageCreate(HandleKickVote)))
+	dg.AddHandler(IsValidBotResponseChannel(BotMentionedMessageCreate(NonBotMessageCreate(botResponse)), configuration.ValidChannelList))
+	dg.AddHandler(IsValidBotResponseChannel(BotMentionedMessageCreate(NonBotMessageCreate(HandleKickVote)), configuration.ValidChannelList))
 
 	// Open the websocket and begin listening.
 	err = dg.Open()
