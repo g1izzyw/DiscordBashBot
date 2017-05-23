@@ -34,11 +34,11 @@ func IsValidBotResponseChannel(handler func(s *Session, m *MessageCreate), chann
 			channel, _ := s.Channel(channelId)
 			if messageChannel.Name == channel.Name {
 				handler(s, m)
-				return
+				//return
 			}
 		}
 
-		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("%v this channel does not process command, try another channel", m.ChannelID))
+		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("%v this channel does not process command, try another channel", messageChannel))
 	}
 }
 

@@ -45,8 +45,8 @@ func main() {
 	}
 
 	// Register messageCreate as a callback for the messageCreate events.
-	dg.AddHandler(IsValidBotResponseChannel(BotMentionedMessageCreate(NonBotMessageCreate(botResponse)), configuration.ValidChannelList))
-	dg.AddHandler(IsValidBotResponseChannel(BotMentionedMessageCreate(NonBotMessageCreate(HandleKickVote)), configuration.ValidChannelList))
+	dg.AddHandler(NonBotMessageCreate(IsValidBotResponseChannel(BotMentionedMessageCreate(botResponse), configuration.ValidChannelList)))
+	dg.AddHandler(NonBotMessageCreate(IsValidBotResponseChannel(BotMentionedMessageCreate(HandleKickVote), configuration.ValidChannelList)))
 
 	// Open the websocket and begin listening.
 	err = dg.Open()
