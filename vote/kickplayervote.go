@@ -14,7 +14,7 @@ var (
 	kickPlayerVoteMap map[string]*kickplayervote
 )
 
-const kickString string = "KICK_PLAYER"
+//const kickString string = "KICK_PLAYER"
 
 func init() {
 	kickPlayerVoteMap = make(map[string]*kickplayervote)
