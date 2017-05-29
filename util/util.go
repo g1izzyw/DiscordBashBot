@@ -5,6 +5,7 @@ import (
 	"time"
 
 	. "github.com/bwmarrin/discordgo"
+	. "github.com/go-redis/redis"
 )
 
 func NonBotMessageCreate(handler func(s *Session, m *MessageCreate)) func(s *Session, m *MessageCreate) {
@@ -62,3 +63,5 @@ func WarningOutputByBot(t time.Duration, message string, s *Session, channelId s
 		s.ChannelMessageSend(channelId, message)
 	}()
 }
+
+func 

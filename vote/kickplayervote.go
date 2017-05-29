@@ -8,6 +8,7 @@ import (
 	. "DiscordBashBot/util"
 
 	. "github.com/bwmarrin/discordgo"
+	. "github.com/go-redis/redis"
 )
 
 var (
@@ -38,6 +39,7 @@ func ConstructKickPlayer(u *User, cId string) *kickplayervote {
 }
 
 func (voteToStart *kickplayervote) startVote(s *Session) {
+	//TODO: put into redis
 	s.ChannelMessageSend(voteToStart.channelID, fmt.Sprintf("You have 2 min to kick player %v", voteToStart.playerToKick.Username))
 
 	WarningOutputByBot(time.Minute+(30*time.Second), fmt.Sprintf("You have 30 second remaining for your vote to kick %v", voteToStart.playerToKick.Username), s, voteToStart.channelID)
@@ -124,4 +126,22 @@ func HandleKickVote(s *Session, m *MessageCreate) {
 	}
 	// can't kick the bot
 	s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("..|.. <@%v>", m.Author.ID))
+}
+
+//TODO: read and load all on going votes
+func LoadOngoingKickPlayerVotes() {
+	client := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+
+	val2, err := client.Get("key2").Result()
+	if err == redis.Nil {
+		fmt.Println("key2 does not exists")
+	} else if err != nil {
+		panic(err)
+	} else {
+		fmt.Println("key2", val2)
+	}
 }

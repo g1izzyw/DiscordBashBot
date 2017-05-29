@@ -24,6 +24,8 @@ type Configuration struct {
 func init() {
 	flag.StringVar(&Token, "t", "", "Bot Token")
 	flag.Parse()
+
+	LoadOngoingKickPlayerVotes()
 }
 
 func main() {
