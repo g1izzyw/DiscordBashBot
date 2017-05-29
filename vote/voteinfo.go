@@ -18,3 +18,12 @@ type voteinfo struct {
 func loadVotes(c *Client) []*voteinfo {
 
 }
+
+func ConstructVoteInfo(u *User, vote bool) *voteinfo {
+	vi := new(voteinfo)
+	vi.timePlaced = time.Now()
+	vi.user = u
+	vi.vote = vote
+
+	return vi
+}

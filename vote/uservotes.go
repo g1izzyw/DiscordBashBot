@@ -52,9 +52,11 @@ func (uv *uservote) GetNoVoteCount() int {
 }
 
 func (uv *uservote) AddVoteToList(u *User, vote bool) {
-	newUserVote := new(voteinfo)
-	newUserVote.timePlaced = time.Now()
-	newUserVote.user = u
-	newUserVote.vote = vote
+	//newUserVote := new(voteinfo)
+	//newUserVote.timePlaced = time.Now()
+	//newUserVote.user = u
+	//newUserVote.vote = vote
+	newUserVote := ConstructVoteInfo(u, vote)
+
 	uv.votes = append(uv.votes, newUserVote)
 }
