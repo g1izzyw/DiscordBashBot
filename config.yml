@@ -1,4 +1,6 @@
 ---
 token: 
-validChannelList: 
+validchannellist: 
   - general_chat
+redishost: 127.0.0.1
+redisport: 6379

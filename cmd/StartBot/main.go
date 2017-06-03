@@ -1,6 +1,7 @@
 package main
 
 import (
+	. "DiscordBashBot/configuration"
 	. "DiscordBashBot/util"
 	. "DiscordBashBot/vote"
 	"flag"
@@ -16,11 +17,6 @@ var (
 	Token string
 )
 
-type Configuration struct {
-	Token            string
-	ValidChannelList []string
-}
-
 func init() {
 	flag.StringVar(&Token, "t", "", "Bot Token")
 	flag.Parse()
@@ -33,22 +29,23 @@ func main() {
 	if err != nil {
 		fmt.Println("Error opening config file: ", err)
 	}
-	configuration := new(Configuration)
-	err = Unmarshal(file, configuration)
+	BotConfiguration = new(BotConfigurationObject)
+	err = Unmarshal(file, BotConfiguration)
 	if err != nil {
 		fmt.Println("Error parsing config file:", err)
 	}
 
 	// Create a new Discord session using the provided bot token.
-	dg, err := New("Bot " + configuration.Token)
+	dg, err := New("Bot " + *BotConfiguration.Token)
 	if err != nil {
 		fmt.Println("error creating Discord session,", err)
 		return
 	}
 
 	// Register messageCreate as a callback for the messageCreate events.
-	dg.AddHandler(NonBotMessageCreate(IsValidBotResponseChannel(BotMentionedMessageCreate(botResponse), configuration.ValidChannelList)))
-	dg.AddHandler(NonBotMessageCreate(IsValidBotResponseChannel(BotMentionedMessageCreate(HandleKickVote), configuration.ValidChannelList)))
+	dg.AddHandler(BotMentionedMessageCreate(NonBotMessageCreate(NotifyInvalidChannel(BotConfiguration.ValidChannelList))))
+	dg.AddHandler(NonBotMessageCreate(HandleIfValidBotResponseChannel(BotMentionedMessageCreate(botResponse), BotConfiguration.ValidChannelList)))
+	dg.AddHandler(NonBotMessageCreate(HandleIfValidBotResponseChannel(BotMentionedMessageCreate(HandleKickVote), BotConfiguration.ValidChannelList)))
 
 	// Open the websocket and begin listening.
 	err = dg.Open()

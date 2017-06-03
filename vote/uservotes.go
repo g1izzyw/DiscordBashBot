@@ -1,6 +1,8 @@
 package vote
 
 import (
+	. "DiscordBashBot/util"
+	"strconv"
 	"time"
 
 	. "github.com/bwmarrin/discordgo"
@@ -15,6 +17,21 @@ type IUserVote interface {
 type uservote struct {
 	starttime time.Time
 	votes     []*voteinfo
+}
+
+func (vote *uservote) addToRedis() string {
+	connection := GetRedisConnection()
+	voteId := strconv.FormatInt(connection.Incr("UserVoteCounter").Val(), 10)
+	connection.HSet("UserVote:"+voteId, "StartTime", vote.starttime.Unix())
+	connection.HSet("UserVote:"+voteId, "UserVoteId", voteId)
+	connection.LPush("UserVotes", voteId)
+	for _, voteInfo := range vote.votes {
+		voteInfoId := voteInfo.addToRedis()
+		connection.LPush("UserVote:"+voteId+":VoteInfos", voteInfoId)
+	}
+	connection.BgSave()
+	connection.Close()
+	return voteId
 }
 
 func ConstructUserVote() *uservote {

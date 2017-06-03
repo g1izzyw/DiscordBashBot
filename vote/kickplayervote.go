@@ -2,6 +2,7 @@ package vote
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -34,8 +35,22 @@ func ConstructKickPlayer(u *User, cId string) *kickplayervote {
 	kpv.playerToKick = u
 	kpv.channelID = cId
 
-	fmt.Println("here3")
 	return kpv
+}
+
+func (newVote *kickplayervote) addToRedis() string {
+	fmt.Println("Adding kick player vote to redis")
+	connection := GetRedisConnection()
+	voteId := strconv.FormatInt(connection.Incr("KickPlayerVoteCounter").Val(), 10)
+	connection.LPush("KickPlayerVotes", voteId)
+	connection.HSet("KickPlayerVote:"+voteId, "Id", voteId)
+	connection.HSet("KickPlayerVote:"+voteId, "UserId", newVote.playerToKick.ID)
+	connection.HSet("KickPlayerVote:"+voteId, "ChannelId", newVote.channelID)
+	userVotesId := newVote.userVotes.addToRedis()
+	connection.HSet("KickPlayerVote:"+voteId, "UserVoteId", userVotesId)
+	connection.BgSave()
+	connection.Close()
+	return voteId
 }
 
 func (voteToStart *kickplayervote) startVote(s *Session) {
@@ -43,6 +58,8 @@ func (voteToStart *kickplayervote) startVote(s *Session) {
 	s.ChannelMessageSend(voteToStart.channelID, fmt.Sprintf("You have 2 min to kick player %v", voteToStart.playerToKick.Username))
 
 	WarningOutputByBot(time.Minute+(30*time.Second), fmt.Sprintf("You have 30 second remaining for your vote to kick %v", voteToStart.playerToKick.Username), s, voteToStart.channelID)
+
+	voteToStart.addToRedis()
 
 	go func() {
 		time.Sleep(2 * time.Minute)
