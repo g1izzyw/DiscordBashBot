@@ -4,7 +4,7 @@ import (
 	"time"
 
 	. "github.com/bwmarrin/discordgo"
-	. "github.com/go-redis/redis"
+	"github.com/go-redis/redis"
 )
 
 type voteinfo struct {
@@ -15,8 +15,9 @@ type voteinfo struct {
 	isOngoing  bool
 }
 
-func loadVotes(c *Client) []*voteinfo {
+func loadVotes(c *redis.Client) []*voteinfo {
 
+	return nil
 }
 
 func ConstructVoteInfo(u *User, vote bool) *voteinfo {

@@ -8,7 +8,7 @@ import (
 	. "DiscordBashBot/util"
 
 	. "github.com/bwmarrin/discordgo"
-	. "github.com/go-redis/redis"
+	"github.com/go-redis/redis"
 )
 
 var (
@@ -63,7 +63,7 @@ func (voteToCheck *kickplayervote) votePassed() bool {
 }
 
 func HandleKickVote(s *Session, m *MessageCreate) {
-	startIndex := strings.Index(m.Content, kickString)
+	startIndex := strings.Index(m.Content, KICK_STRING)
 
 	if startIndex == -1 || len(m.Mentions) != 2 {
 		return
